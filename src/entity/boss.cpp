@@ -21,6 +21,8 @@ Boss::Boss(Position pos, int floorIndex)
     hp_      = maxHp_;
     attack_  = static_cast<int>(attack_ * constants::BOSS_ATTACK_MULTIPLIER);
     defense_ = static_cast<int>(defense_ * constants::BOSS_DEFENSE_MULTIPLIER);
+    expReward_ = static_cast<int>(expReward_ * constants::BOSS_EXP_MULTIPLIER);
+    goldReward_ = static_cast<int>(goldReward_ * constants::BOSS_GOLD_MULTIPLIER);
 }
 
 bool Boss::isBoss() const {

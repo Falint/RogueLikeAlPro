@@ -14,19 +14,17 @@ namespace roguelike {
 namespace constants {
 
 // ─── Map Dimensions ──────────────────────────────────────────────────────────
-constexpr int MAP_WIDTH  = 40;
-constexpr int MAP_HEIGHT = 20;
+constexpr int MAP_WIDTH  = 120;
+constexpr int MAP_HEIGHT = 60;
 
 // ─── Floor / Dungeon ─────────────────────────────────────────────────────────
-constexpr int TOTAL_FLOORS       = 3;
-constexpr int FLOOR_EASY         = 0;
-constexpr int FLOOR_MEDIUM       = 1;
-constexpr int FLOOR_BOSS         = 2;
+// Mode Endless: Konstanta lantai spesifik dihapus karena infinite
+constexpr int BOSS_FLOOR_INTERVAL = 3;
 
 // ─── Room Generation ─────────────────────────────────────────────────────────
 constexpr int MIN_ROOM_SIZE      = 4;
-constexpr int MAX_ROOM_SIZE      = 8;
-constexpr int MAX_ROOMS_PER_MAP  = 6;
+constexpr int MAX_ROOM_SIZE      = 10;
+constexpr int MAX_ROOMS_PER_MAP  = 25;
 
 // ─── Tile Characters ─────────────────────────────────────────────────────────
 constexpr char TILE_WALL       = '#';
@@ -37,7 +35,8 @@ constexpr char TILE_BOSS       = 'B';
 constexpr char TILE_GOLD       = 'G';
 constexpr char TILE_WEAPON     = 'W';
 constexpr char TILE_CHECKPOINT = 'C';
-constexpr char TILE_STAIRS     = '>';
+constexpr char TILE_STAIRS_DOWN = '>';
+constexpr char TILE_STAIRS_UP   = '<';
 constexpr char TILE_POTION     = '+';
 
 // ─── Player Defaults ─────────────────────────────────────────────────────────
@@ -61,24 +60,23 @@ constexpr int ENEMY_BASE_DEFENSE = 2;
 constexpr int ENEMY_BASE_EXP     = 25;
 constexpr int ENEMY_BASE_GOLD    = 10;
 
-// ─── Enemy Scaling per Floor ─────────────────────────────────────────────────
-constexpr double ENEMY_HP_SCALE_PER_FLOOR      = 1.5;
-constexpr double ENEMY_ATTACK_SCALE_PER_FLOOR  = 1.4;
-constexpr double ENEMY_DEFENSE_SCALE_PER_FLOOR = 1.3;
-constexpr double ENEMY_EXP_SCALE_PER_FLOOR     = 1.5;
-constexpr double ENEMY_GOLD_SCALE_PER_FLOOR    = 1.4;
+// ─── Enemy Scaling per Floor (Linear) ────────────────────────────────────────
+constexpr int ENEMY_HP_ADD_PER_FLOOR      = 15;
+constexpr int ENEMY_ATTACK_ADD_PER_FLOOR  = 3;
+constexpr int ENEMY_DEFENSE_ADD_PER_FLOOR = 1;
+constexpr int ENEMY_EXP_ADD_PER_FLOOR     = 10;
+constexpr int ENEMY_GOLD_ADD_PER_FLOOR    = 5;
 
-// ─── Boss Stats ──────────────────────────────────────────────────────────────
-constexpr double BOSS_HP_MULTIPLIER      = 5.0;
-constexpr double BOSS_ATTACK_MULTIPLIER  = 2.5;
-constexpr double BOSS_DEFENSE_MULTIPLIER = 2.0;
-constexpr double BOSS_EXP_MULTIPLIER     = 5.0;
-constexpr double BOSS_GOLD_MULTIPLIER    = 8.0;
+// ─── Boss Stats (Solo & Sangat Sulit) ────────────────────────────────────────
+constexpr double BOSS_HP_MULTIPLIER      = 15.0;
+constexpr double BOSS_ATTACK_MULTIPLIER  = 4.0;
+constexpr double BOSS_DEFENSE_MULTIPLIER = 3.0;
+constexpr double BOSS_EXP_MULTIPLIER     = 10.0;
+constexpr double BOSS_GOLD_MULTIPLIER    = 20.0;
 
 // ─── Enemy Count per Floor ───────────────────────────────────────────────────
-constexpr int ENEMIES_FLOOR_EASY   = 5;
-constexpr int ENEMIES_FLOOR_MEDIUM = 7;
-constexpr int ENEMIES_FLOOR_BOSS   = 4; // plus the boss itself
+constexpr int ENEMIES_BASE_COUNT = 8;
+constexpr int ENEMIES_ADD_PER_FLOOR = 2;
 
 // ─── AI ──────────────────────────────────────────────────────────────────────
 constexpr int ENEMY_DETECTION_RANGE = 8;
@@ -123,15 +121,17 @@ constexpr int LOOT_ENEMY_RARE_WPN_CHANCE   = 5;
 
 // ─── Loot Drop Rates (Boss) — dalam persen 0–100 ────────────────────────────
 constexpr int LOOT_BOSS_GOLD_CHANCE           = 100;
-constexpr int LOOT_BOSS_EPIC_WPN_CHANCE       = 40;
-constexpr int LOOT_BOSS_LEGENDARY_WPN_CHANCE  = 15;
-constexpr int LOOT_BOSS_POTION_CHANCE         = 60;
+constexpr int LOOT_BOSS_EPIC_WPN_CHANCE       = 0;
+constexpr int LOOT_BOSS_LEGENDARY_WPN_CHANCE  = 100; // Selalu dapat legendary
+constexpr int LOOT_BOSS_POTION_CHANCE         = 100;
 
 // ─── Boss Gold Drop ──────────────────────────────────────────────────────────
-constexpr int BOSS_GOLD_DROP_MIN = 80;
-constexpr int BOSS_GOLD_DROP_MAX = 200;
+constexpr int BOSS_GOLD_DROP_MIN = 300;
+constexpr int BOSS_GOLD_DROP_MAX = 800;
 
 // ─── Display ─────────────────────────────────────────────────────────────────
+constexpr int VIEWPORT_WIDTH  = 100;
+constexpr int VIEWPORT_HEIGHT = 30;
 constexpr int HUD_WIDTH = 50;
 
 } // namespace constants

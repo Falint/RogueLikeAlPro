@@ -20,7 +20,7 @@ public:
     /**
      * @brief Membuat boss pada posisi dan floor tertentu.
      * @param pos Posisi boss.
-     * @param floorIndex Floor index (biasanya FLOOR_BOSS = 2).
+     * @param floorIndex Floor index.
      */
     Boss(Position pos, int floorIndex);
 

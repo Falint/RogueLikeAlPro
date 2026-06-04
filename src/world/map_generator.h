@@ -40,8 +40,11 @@ private:
     /** @brief Menempatkan checkpoint di room acak. */
     static void placeCheckpoint(Map& map);
 
-    /** @brief Menempatkan stairs di room terjauh dari room pertama. */
-    static void placeStairs(Map& map);
+    /** @brief Menempatkan stairs down di room terjauh dari room pertama. */
+    static void placeStairsDown(Map& map);
+
+    /** @brief Menempatkan stairs up di room pertama. */
+    static void placeStairsUp(Map& map);
 };
 
 } // namespace roguelike

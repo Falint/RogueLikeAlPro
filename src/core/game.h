@@ -33,8 +33,8 @@ private:
     void showMainMenu();
     void startNewGame();
     bool loadGameFromFile();
-    void initializeFloor(int floorIndex);
-    void placePlayer();
+    void initializeFloor(int floorIndex, bool goingUp = false);
+    void placePlayer(bool goingUp = false);
     void spawnEnemies(int floorIndex);
     void spawnBoss(int floorIndex);
     void placeLootOnMap();

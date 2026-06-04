@@ -12,6 +12,8 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <sys/ioctl.h>
+#include <unistd.h>
 
 namespace roguelike {
 
@@ -70,16 +72,49 @@ void Renderer::render(const Map& map,
     }
 
     /* Tampilkan floor header */
-    std::string floorNames[] = {"Floor 1 - Easy", "Floor 2 - Medium", "Floor 3 - Boss"};
-    std::string floorLabel = "Unknown Floor";
-    if (currentFloor >= 0 && currentFloor < constants::TOTAL_FLOORS) {
-        floorLabel = floorNames[static_cast<size_t>(currentFloor)];
+    std::string floorLabel = "Floor " + std::to_string(currentFloor + 1);
+    if ((currentFloor + 1) % constants::BOSS_FLOOR_INTERVAL == 0) {
+        floorLabel += " (Boss)";
     }
     std::cout << "=== " << floorLabel << " ===\n";
 
-    /* Render buffer ke terminal */
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
+    /* Tentukan Camera Viewport dinamis menyesuaikan ukuran terminal */
+    int termWidth = constants::VIEWPORT_WIDTH;
+    int termHeight = constants::VIEWPORT_HEIGHT;
+#ifdef __linux__
+    struct winsize w;
+    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) != -1) {
+        termWidth = w.ws_col;
+        // Kurangi 10 baris untuk menyisakan ruang bagi HUD, title, dan menu controls
+        termHeight = w.ws_row - 10; 
+    }
+#endif
+
+    if (termWidth < 20) termWidth = 20;
+    if (termHeight < 5) termHeight = 5;
+
+    int startX = player.getPosition().x - (termWidth / 2);
+    int startY = player.getPosition().y - (termHeight / 2);
+
+    /* Clamp kamera agar tidak keluar dari map */
+    if (startX < 0) startX = 0;
+    if (startY < 0) startY = 0;
+    if (startX + termWidth > width) startX = width - termWidth;
+    if (startY + termHeight > height) startY = height - termHeight;
+
+    // Pastikan tidak negatif jika map lebih kecil dari terminal
+    if (startX < 0) startX = 0;
+    if (startY < 0) startY = 0;
+
+    int endX = startX + termWidth;
+    int endY = startY + termHeight;
+    
+    if (endX > width) endX = width;
+    if (endY > height) endY = height;
+
+    /* Render buffer ke terminal berdasarkan viewport */
+    for (int y = startY; y < endY; ++y) {
+        for (int x = startX; x < endX; ++x) {
             char ch = buffer[static_cast<size_t>(y)][static_cast<size_t>(x)];
 
             /* Warna ANSI berdasarkan karakter */
@@ -102,7 +137,8 @@ void Renderer::render(const Map& map,
                 case constants::TILE_CHECKPOINT:
                     std::cout << "\033[1;34m" << ch << "\033[0m"; // biru terang
                     break;
-                case constants::TILE_STAIRS:
+                case constants::TILE_STAIRS_DOWN:
+                case constants::TILE_STAIRS_UP:
                     std::cout << "\033[1;33m" << ch << "\033[0m"; // kuning
                     break;
                 case constants::TILE_POTION:

@@ -32,7 +32,7 @@ public:
     /** @brief Mendapatkan floor index enemy ini. */
     int getFloorIndex() const;
 
-private:
+protected:
     int expReward_;
     int goldReward_;
     int floorIndex_;

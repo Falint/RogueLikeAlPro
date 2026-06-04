@@ -73,8 +73,11 @@ public:
     /** @brief Menambahkan room ke daftar (digunakan oleh MapGenerator). */
     void addRoom(const Room& room);
 
-    /** @brief Mendapatkan posisi stairs (tangga ke lantai berikutnya). */
-    Position getStairsPosition() const;
+    /** @brief Mendapatkan posisi stairs up (tangga ke lantai sebelumnya). */
+    Position getStairsUpPosition() const;
+
+    /** @brief Mendapatkan posisi stairs down (tangga ke lantai berikutnya). */
+    Position getStairsDownPosition() const;
 
     int getWidth() const;
     int getHeight() const;

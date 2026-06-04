@@ -66,7 +66,8 @@ char Map::getRenderChar(int x, int y) const {
         case TileType::WALL:       return constants::TILE_WALL;
         case TileType::FLOOR:      return constants::TILE_FLOOR;
         case TileType::CHECKPOINT: return constants::TILE_CHECKPOINT;
-        case TileType::STAIRS:     return constants::TILE_STAIRS;
+        case TileType::STAIRS_DOWN: return constants::TILE_STAIRS_DOWN;
+        case TileType::STAIRS_UP:   return constants::TILE_STAIRS_UP;
     }
     return constants::TILE_FLOOR;
 }
@@ -79,10 +80,21 @@ void Map::addRoom(const Room& room) {
     rooms_.push_back(room);
 }
 
-Position Map::getStairsPosition() const {
+Position Map::getStairsUpPosition() const {
     for (int y = 0; y < height_; ++y) {
         for (int x = 0; x < width_; ++x) {
-            if (grid_[static_cast<size_t>(y)][static_cast<size_t>(x)] == TileType::STAIRS) {
+            if (grid_[static_cast<size_t>(y)][static_cast<size_t>(x)] == TileType::STAIRS_UP) {
+                return {x, y};
+            }
+        }
+    }
+    return {-1, -1};
+}
+
+Position Map::getStairsDownPosition() const {
+    for (int y = 0; y < height_; ++y) {
+        for (int x = 0; x < width_; ++x) {
+            if (grid_[static_cast<size_t>(y)][static_cast<size_t>(x)] == TileType::STAIRS_DOWN) {
                 return {x, y};
             }
         }

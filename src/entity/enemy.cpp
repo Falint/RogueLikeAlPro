@@ -16,19 +16,19 @@ namespace roguelike {
 Enemy::Enemy(Position pos, int floorIndex)
     : Entity(
         "Goblin",
-        static_cast<int>(constants::ENEMY_BASE_HP * std::pow(constants::ENEMY_HP_SCALE_PER_FLOOR, floorIndex)),
-        static_cast<int>(constants::ENEMY_BASE_ATTACK * std::pow(constants::ENEMY_ATTACK_SCALE_PER_FLOOR, floorIndex)),
-        static_cast<int>(constants::ENEMY_BASE_DEFENSE * std::pow(constants::ENEMY_DEFENSE_SCALE_PER_FLOOR, floorIndex)),
+        constants::ENEMY_BASE_HP + (constants::ENEMY_HP_ADD_PER_FLOOR * floorIndex),
+        constants::ENEMY_BASE_ATTACK + (constants::ENEMY_ATTACK_ADD_PER_FLOOR * floorIndex),
+        constants::ENEMY_BASE_DEFENSE + (constants::ENEMY_DEFENSE_ADD_PER_FLOOR * floorIndex),
         pos,
         EntityType::ENEMY)
-    , expReward_(static_cast<int>(constants::ENEMY_BASE_EXP * std::pow(constants::ENEMY_EXP_SCALE_PER_FLOOR, floorIndex)))
-    , goldReward_(static_cast<int>(constants::ENEMY_BASE_GOLD * std::pow(constants::ENEMY_GOLD_SCALE_PER_FLOOR, floorIndex)))
+    , expReward_(constants::ENEMY_BASE_EXP + (constants::ENEMY_EXP_ADD_PER_FLOOR * floorIndex))
+    , goldReward_(constants::ENEMY_BASE_GOLD + (constants::ENEMY_GOLD_ADD_PER_FLOOR * floorIndex))
     , floorIndex_(floorIndex)
 {
     /* Beri nama berdasarkan floor untuk variasi */
-    static const std::string names[] = {"Goblin", "Orc", "Dark Knight"};
-    if (floorIndex >= 0 && floorIndex < static_cast<int>(std::size(names))) {
-        name_ = names[static_cast<size_t>(floorIndex)];
+    static const std::string names[] = {"Goblin", "Orc", "Dark Knight", "Troll", "Vampire"};
+    if (floorIndex >= 0) {
+        name_ = names[floorIndex % std::size(names)];
     }
 }
 

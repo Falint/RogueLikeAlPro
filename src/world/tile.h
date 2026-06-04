@@ -17,7 +17,8 @@ enum class TileType {
     WALL,
     FLOOR,
     CHECKPOINT,
-    STAIRS  // tangga ke lantai berikutnya
+    STAIRS_DOWN,  // tangga ke lantai berikutnya
+    STAIRS_UP     // tangga ke lantai sebelumnya
 };
 
 /**
@@ -27,7 +28,8 @@ inline bool isWalkable(TileType tile) {
     switch (tile) {
         case TileType::FLOOR:
         case TileType::CHECKPOINT:
-        case TileType::STAIRS:
+        case TileType::STAIRS_DOWN:
+        case TileType::STAIRS_UP:
             return true;
         case TileType::WALL:
             return false;

@@ -68,9 +68,12 @@ Map MapGenerator::generate(int floorIndex) {
 
     placeCheckpoint(map);
 
-    /* Stairs hanya di lantai non-terakhir */
-    if (floorIndex < constants::TOTAL_FLOORS - 1) {
-        placeStairs(map);
+    /* Selalu bisa turun ke lantai berikutnya */
+    placeStairsDown(map);
+    
+    /* Mulai lantai 1, pemain bisa naik kembali */
+    if (floorIndex > 0) {
+        placeStairsUp(map);
     }
 
     return map;
@@ -124,13 +127,22 @@ void MapGenerator::placeCheckpoint(Map& map) {
     map.setTile(pos, TileType::CHECKPOINT);
 }
 
-void MapGenerator::placeStairs(Map& map) {
+void MapGenerator::placeStairsDown(Map& map) {
     const auto& rooms = map.getRooms();
     if (rooms.empty()) return;
 
-    /* Tempatkan stairs di room terakhir (terjauh dari spawn room pertama) */
+    /* Tempatkan stairs down di room terakhir (terjauh dari spawn room pertama) */
     Position pos = rooms.back().center();
-    map.setTile(pos, TileType::STAIRS);
+    map.setTile(pos, TileType::STAIRS_DOWN);
+}
+
+void MapGenerator::placeStairsUp(Map& map) {
+    const auto& rooms = map.getRooms();
+    if (rooms.empty()) return;
+
+    /* Tempatkan stairs up di room pertama (dekat spawn) */
+    Position pos = rooms.front().center();
+    map.setTile(pos, TileType::STAIRS_UP);
 }
 
 } // namespace roguelike

@@ -19,16 +19,22 @@ namespace roguelike {
 
 Game::Game()
     : gameState_(GameState::PLAYING)
-    , currentFloor_(constants::FLOOR_EASY)
+    , currentFloor_(0)
     , bossDefeated_(false)
 {
 }
 
 void Game::run() {
+    /* Enter Alternate Screen Buffer agar frame tidak menumpuk di scrollback terminal */
+    std::cout << "\033[?1049h";
+    
     showMainMenu();
     if (gameState_ != GameState::QUIT) {
         gameLoop();
     }
+    
+    /* Leave Alternate Screen Buffer saat keluar game */
+    std::cout << "\033[?1049l";
 }
 
 void Game::showMainMenu() {
@@ -65,7 +71,7 @@ void Game::showMainMenu() {
 
 void Game::startNewGame() {
     gameState_ = GameState::PLAYING;
-    currentFloor_ = constants::FLOOR_EASY;
+    currentFloor_ = 0;
     player_ = Player("Hero", {0, 0});
     bossDefeated_ = false;
     messages_.clear();
@@ -135,24 +141,42 @@ bool Game::loadGameFromFile() {
     return true;
 }
 
-void Game::initializeFloor(int floorIndex) {
+void Game::initializeFloor(int floorIndex, bool goingUp) {
     currentMap_ = MapGenerator::generate(floorIndex);
     enemies_.clear();
     lootOnMap_.clear();
     weaponDropsOnMap_.clear();
     bossDefeated_ = false;
 
-    placePlayer();
-    spawnEnemies(floorIndex);
-
-    if (floorIndex == constants::FLOOR_BOSS) {
+    placePlayer(goingUp);
+    
+    if ((floorIndex + 1) % constants::BOSS_FLOOR_INTERVAL == 0) {
         spawnBoss(floorIndex);
+    } else {
+        spawnEnemies(floorIndex);
     }
 
     placeLootOnMap();
 }
 
-void Game::placePlayer() {
+void Game::placePlayer(bool goingUp) {
+    if (goingUp) {
+        // Pemain naik tangga dari bawah, maka muncul di tangga turun
+        Position startPos = currentMap_.getStairsDownPosition();
+        if (startPos.x != -1) {
+            player_.setPosition(startPos);
+            return;
+        }
+    } else {
+        // Pemain turun tangga dari atas, maka muncul di tangga naik
+        Position startPos = currentMap_.getStairsUpPosition();
+        if (startPos.x != -1) {
+            player_.setPosition(startPos);
+            return;
+        }
+    }
+    
+    // Fallback: tengah ruangan pertama
     const auto& rooms = currentMap_.getRooms();
     if (!rooms.empty()) {
         Position startPos = rooms.front().center();
@@ -161,13 +185,7 @@ void Game::placePlayer() {
 }
 
 void Game::spawnEnemies(int floorIndex) {
-    int count = 0;
-    switch (floorIndex) {
-        case constants::FLOOR_EASY:   count = constants::ENEMIES_FLOOR_EASY;   break;
-        case constants::FLOOR_MEDIUM: count = constants::ENEMIES_FLOOR_MEDIUM; break;
-        case constants::FLOOR_BOSS:   count = constants::ENEMIES_FLOOR_BOSS;   break;
-        default: count = constants::ENEMIES_FLOOR_EASY; break;
-    }
+    int count = constants::ENEMIES_BASE_COUNT + (floorIndex * constants::ENEMIES_ADD_PER_FLOOR);
 
     const auto& rooms = currentMap_.getRooms();
     auto& rng = RandomManager::instance();
@@ -197,7 +215,7 @@ void Game::spawnBoss(int floorIndex) {
     Position bossPos = bossRoom.center();
 
     /* Offset slightly so not on stairs */
-    if (currentMap_.getTile(bossPos) == TileType::STAIRS) {
+    if (currentMap_.getTile(bossPos) == TileType::STAIRS_DOWN || currentMap_.getTile(bossPos) == TileType::STAIRS_UP) {
         bossPos.x += 1;
     }
 
@@ -251,12 +269,17 @@ void Game::processInput(InputAction action) {
     Direction dir = InputHandler::actionToDirection(action);
 
     if (dir != Direction::NONE) {
+        Position oldPos = player_.getPosition();
         movePlayer(dir);
         updateEnemyAI();
         resolveCombat();
         checkLootPickup();
         checkCheckpoint();
-        checkStairs();
+        
+        // Hanya cek stairs jika pemain benar-benar berpindah tempat (baru menginjak)
+        if (oldPos != player_.getPosition()) {
+            checkStairs();
+        }
         return;
     }
 
@@ -302,12 +325,7 @@ void Game::movePlayer(Direction dir) {
 
                 if (enemy->getType() == EntityType::BOSS) {
                     bossDefeated_ = true;
-                    addMessage("*** BOSS DEFEATED! ***");
-
-                    /* Check victory on boss floor */
-                    if (currentFloor_ == constants::FLOOR_BOSS) {
-                        gameState_ = GameState::VICTORY;
-                    }
+                    addMessage("*** BOSS DEFEATED! Proceed downstairs! ***");
                 }
             }
             return;
@@ -393,11 +411,17 @@ void Game::checkCheckpoint() {
 }
 
 void Game::checkStairs() {
-    if (currentMap_.getTile(player_.getPosition()) == TileType::STAIRS) {
-        if (currentFloor_ < constants::TOTAL_FLOORS - 1) {
-            ++currentFloor_;
-            addMessage("Descending to floor " + std::to_string(currentFloor_ + 1) + "...");
-            initializeFloor(currentFloor_);
+    if (currentMap_.getTile(player_.getPosition()) == TileType::STAIRS_DOWN) {
+        ++currentFloor_;
+        addMessage("Descending to floor " + std::to_string(currentFloor_ + 1) + "...");
+        initializeFloor(currentFloor_, false);
+    } else if (currentMap_.getTile(player_.getPosition()) == TileType::STAIRS_UP) {
+        if (currentFloor_ > 0) {
+            --currentFloor_;
+            addMessage("Ascending to floor " + std::to_string(currentFloor_ + 1) + "...");
+            initializeFloor(currentFloor_, true);
+        } else {
+            addMessage("You cannot go back any further. The dungeon entrance is sealed!");
         }
     }
 }
